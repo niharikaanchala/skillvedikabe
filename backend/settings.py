@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     'about',
     'instructor',
     'contact',
-    # 'accounts',
+    'settings_app',
 ]
 
 APPEND_SLASH = False
@@ -122,7 +122,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'skillvedika',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': 'Mysql@123',
         'HOST': 'localhost',
         'PORT': '3306',
     }

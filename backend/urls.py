@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/about/', include('about.urls')),
     path('api/instructor/', include('instructor.urls')),
     path('api/contact/', include('contact.urls')),
+    path('api/settings_app/', include('settings_app.urls')),
 
     
 ]
