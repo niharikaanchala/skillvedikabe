@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'instructor',
     'contact',
     'settings_app',
+    'legal_pages',
 ]
 
 APPEND_SLASH = False
