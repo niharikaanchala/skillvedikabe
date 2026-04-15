@@ -5,6 +5,8 @@ class LegalPage(models.Model):
     PAGE_CHOICES = [
         ("terms", "Terms & Conditions"),
         ("privacy", "Privacy Policy"),
+        ("disclaimer", "Disclaimer"),
+        ("editorial-policy", "Editorial Policy"),
     ]
 
     page_type = models.CharField(max_length=20, choices=PAGE_CHOICES, unique=True)

@@ -61,3 +61,19 @@ class PrivacyPageAPIView(LegalPageTypeAPIView):
 class PrivacyPageDetailAPIView(LegalPageTypeDetailAPIView):
     page_type = "privacy"
 
+
+class DisclaimerPageAPIView(LegalPageTypeAPIView):
+    page_type = "disclaimer"
+
+
+class DisclaimerPageDetailAPIView(LegalPageTypeDetailAPIView):
+    page_type = "disclaimer"
+
+
+class EditorialPolicyPageAPIView(LegalPageTypeAPIView):
+    page_type = "editorial-policy"
+
+
+class EditorialPolicyPageDetailAPIView(LegalPageTypeDetailAPIView):
+    page_type = "editorial-policy"
+
