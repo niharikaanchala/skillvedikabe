@@ -1,7 +1,7 @@
 from django.db import models
 
 class BlogPost(models.Model):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=255)
     category = models.CharField(max_length=100)
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=100)
@@ -10,9 +10,9 @@ class BlogPost(models.Model):
     excerpt = models.TextField()
     image = models.ImageField(upload_to="blog/", blank=True, null=True)
     image_url = models.URLField(blank=True, default="")
-    meta_title = models.CharField(max_length=255, blank=True)
+    meta_title = models.TextField(blank=True, default="")
     meta_description = models.TextField(blank=True)
-    meta_keywords = models.CharField(max_length=255, blank=True)
+    meta_keywords = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.title
@@ -36,9 +36,9 @@ class TableOfContent(models.Model):
 
 # 🔷 BLOG PAGE META TAGS (SEO) - Singleton
 class MetaTags(models.Model):
-    meta_title = models.CharField(max_length=255, blank=True, default="")
+    meta_title = models.TextField(blank=True, default="")
     meta_description = models.TextField(blank=True, default="")
-    meta_keywords = models.CharField(max_length=255, blank=True, default="")
+    meta_keywords = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.meta_title or "Blog MetaTags"

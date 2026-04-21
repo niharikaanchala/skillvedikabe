@@ -28,6 +28,7 @@ class ContactInfo(models.Model):
     label = models.CharField(max_length=100)   # Email us / Call us
     value = models.CharField(max_length=255)   # actual data
     link = models.CharField(max_length=255, blank=True)  # mailto / tel
+    map_embed_url = models.TextField(blank=True, default="")
     icon = models.CharField(max_length=10, blank=True)
 
     def __str__(self):
@@ -49,14 +50,15 @@ class ContactFormSection(models.Model):
     title = models.CharField(max_length=255)
     subtitle = models.TextField()
     button_text = models.CharField(max_length=100)
+    map_embed_url = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.title
 
 class MetaTags(models.Model):
-    meta_title = models.CharField(max_length=255)
+    meta_title = models.TextField()
     meta_description = models.TextField()
-    meta_keywords = models.CharField(max_length=255)
+    meta_keywords = models.TextField()
 
     def __str__(self):
         return self.meta_title

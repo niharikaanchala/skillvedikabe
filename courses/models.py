@@ -8,7 +8,7 @@ class Course(models.Model):
     duration = models.CharField(max_length=50)
     price = models.CharField(max_length=20)
     rating = models.FloatField(default=0)
-    seo_meta_title = models.CharField(max_length=255, blank=True, default="")
+    seo_meta_title = models.TextField(blank=True, default="")
     seo_meta_description = models.TextField(blank=True, default="")
     seo_meta_keywords = models.TextField(blank=True, default="")
 
@@ -28,7 +28,7 @@ class CoursesPageContent(models.Model):
         blank=True,
         help_text='List of CTA buttons for hero: [{"text": "...", "link": "..."}]',
     )
-    meta_title = models.CharField(max_length=255, blank=True, default="")
+    meta_title = models.TextField(blank=True, default="")
     meta_description = models.TextField(blank=True, default="")
     meta_keywords = models.TextField(
         blank=True,

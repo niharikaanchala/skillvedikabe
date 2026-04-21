@@ -1,0 +1,21 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("about", "0002_metatags"),
+    ]
+
+    operations = [
+        migrations.AlterField(
+            model_name="metatags",
+            name="meta_keywords",
+            field=models.TextField(blank=True, default=""),
+        ),
+        migrations.AlterField(
+            model_name="metatags",
+            name="meta_title",
+            field=models.TextField(blank=True, default=""),
+        ),
+    ]

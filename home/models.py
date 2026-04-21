@@ -25,7 +25,7 @@ class Hero(models.Model):
         blank=True,
         default="Search by skill",
     )
-    meta_title = models.CharField(max_length=255, blank=True, default="")
+    meta_title = models.TextField(blank=True, default="")
     meta_description = models.TextField(blank=True, default="")
     meta_keywords = models.TextField(
         blank=True,
@@ -113,6 +113,10 @@ class SupportSection(models.Model):
 class SiteBranding(models.Model):
     brand_name = models.CharField(max_length=120, default="SkillVedika")
     logo = models.ImageField(upload_to="branding/", blank=True, null=True)
+    facebook_url = models.URLField(blank=True, null=True)
+    instagram_url = models.URLField(blank=True, null=True)
+    linkedin_url = models.URLField(blank=True, null=True)
+    youtube_url = models.URLField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Site branding"

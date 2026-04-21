@@ -62,9 +62,9 @@ class DemoRequest(models.Model):
 
 # 🔷 META TAGS (SEO)
 class MetaTags(models.Model):
-    meta_title = models.CharField(max_length=255, blank=True, default="")
+    meta_title = models.TextField(blank=True, default="")
     meta_description = models.TextField(blank=True, default="")
-    meta_keywords = models.CharField(max_length=255, blank=True, default="")
+    meta_keywords = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.meta_title or "MetaTags"

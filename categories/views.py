@@ -130,9 +130,8 @@ class CategoryPageContentView(APIView):
     def get(self, request, id: int):
         if not Category.objects.filter(pk=id).exists():
             return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
-        obj = CategoryPageContent.objects.filter(category_id=id).first()
-        if not obj:
-            return Response({"error": "Category page content not found"}, status=status.HTTP_404_NOT_FOUND)
+        category = Category.objects.get(pk=id)
+        obj, _ = CategoryPageContent.objects.get_or_create(category=category)
         return Response(self._serialize(obj))
 
     def post(self, request, id: int):

@@ -12,7 +12,7 @@ class LegalPage(models.Model):
     page_type = models.CharField(max_length=20, choices=PAGE_CHOICES, unique=True)
     title = models.CharField(max_length=255, blank=True, default="")
     content = models.TextField(blank=True, default="")
-    seo_meta_title = models.CharField(max_length=255, blank=True, default="")
+    seo_meta_title = models.TextField(blank=True, default="")
     seo_meta_description = models.TextField(blank=True, default="")
     seo_meta_keywords = models.TextField(blank=True, default="")
     updated_at = models.DateTimeField(auto_now=True)

@@ -97,6 +97,10 @@ class SiteBrandingSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "logo": {"required": False, "allow_null": True},
             "brand_name": {"required": False, "allow_blank": True},
+            "facebook_url": {"required": False, "allow_null": True, "allow_blank": True},
+            "instagram_url": {"required": False, "allow_null": True, "allow_blank": True},
+            "linkedin_url": {"required": False, "allow_null": True, "allow_blank": True},
+            "youtube_url": {"required": False, "allow_null": True, "allow_blank": True},
         }
 
     def to_representation(self, instance):

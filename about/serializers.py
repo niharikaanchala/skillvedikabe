@@ -8,6 +8,14 @@ class AboutHeroSerializer(serializers.ModelSerializer):
         model = AboutHero
         fields = "__all__"
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.hero_image and hasattr(instance.hero_image, "url"):
+            data["hero_image"] = instance.hero_image.url
+        else:
+            data["hero_image"] = None
+        return data
+
 
 class ValuesSectionSerializer(serializers.ModelSerializer):
     class Meta:

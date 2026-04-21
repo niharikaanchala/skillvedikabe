@@ -7,7 +7,7 @@ class HeroSection(models.Model):
     button_secondary_text = models.CharField(max_length=100, default="Learn More")
     background_color = models.CharField(max_length=7, default="#EAF0F8")
     text_color = models.CharField(max_length=7, default="#0C1A35")
-    seo_meta_title = models.CharField(max_length=255, blank=True, default="")
+    seo_meta_title = models.TextField(blank=True, default="")
     seo_meta_description = models.TextField(blank=True, default="")
     seo_meta_keywords = models.TextField(blank=True, default="")
 

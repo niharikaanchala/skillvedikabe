@@ -224,6 +224,7 @@ class SectionCopyDetailView(APIView):
     """GET/PATCH one section block: features | why_choose | job_program | faq (staff + JWT)."""
 
     permission_classes = [IsAdminUser]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
     SECTIONS = frozenset({"features", "why_choose", "job_program", "faq"})
 
     def get(self, request, section):
@@ -301,10 +302,13 @@ class HomePageBundleView(APIView):
         support = SupportSection.objects.order_by("id").first()
         support_data = SupportSectionSerializer(support).data if support else None
 
-        section_map = {
-            row.section: {"heading": row.heading, "intro": row.intro}
-            for row in SectionCopy.objects.all()
-        }
+        section_map = {}
+        for row in SectionCopy.objects.all():
+            row_data = SectionCopySerializer(row, context={"request": request}).data
+            section_map[row.section] = {
+                "heading": row_data.get("heading", ""),
+                "intro": row_data.get("intro", ""),
+            }
 
         return Response(
             {
