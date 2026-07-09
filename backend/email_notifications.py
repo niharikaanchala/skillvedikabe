@@ -21,6 +21,59 @@ def _value_to_text(v: Any) -> str:
     return str(v)
 
 
+def _extract_course_from_message(message: str) -> tuple[str, str]:
+    if not message:
+        return "", ""
+    course = ""
+    remaining: list[str] = []
+    for line in str(message).splitlines():
+        stripped = line.strip()
+        if stripped.lower().startswith("interested course:"):
+            course = stripped.split(":", 1)[1].strip()
+        elif stripped:
+            remaining.append(line)
+    return course, "\n".join(remaining).strip()
+
+
+def build_user_lead_email_data(data: Dict[str, Any]) -> Dict[str, str]:
+    course = str(data.get("course_title") or "").strip()
+    if not course:
+        raw_course = data.get("course")
+        if raw_course is not None and str(raw_course).strip():
+            course = str(raw_course).strip()
+    if not course:
+        course, _ = _extract_course_from_message(str(data.get("message") or ""))
+
+    full_name = str(data.get("full_name") or "").strip()
+    if not full_name:
+        first = str(data.get("first_name") or "").strip()
+        last = str(data.get("last_name") or "").strip()
+        full_name = f"{first} {last}".strip()
+
+    return {
+        "Full Name": full_name,
+        "Email Address": str(data.get("email") or "").strip(),
+        "Phone Number": str(data.get("phone") or "").strip(),
+        "Course": course,
+    }
+
+
+def build_instructor_application_email_data(data: Dict[str, Any]) -> Dict[str, str]:
+    message = str(data.get("message") or "")
+    course, clean_message = _extract_course_from_message(message)
+
+    return {
+        "First name": str(data.get("first_name") or "").strip(),
+        "Last name": str(data.get("last_name") or "").strip(),
+        "Email": str(data.get("email") or "").strip(),
+        "Phone": str(data.get("phone") or "").strip(),
+        "Years of experience": str(data.get("years_of_experience") or "").strip(),
+        "Skills": str(data.get("skills") or "").strip(),
+        "Message": clean_message,
+        "Course": course,
+    }
+
+
 def send_admin_submission_email(*, title: str, data: Dict[str, Any]) -> None:
     """
     Sends a formal HTML + plain-text email to ADMIN_NOTIFICATION_EMAILS.

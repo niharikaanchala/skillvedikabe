@@ -1,5 +1,8 @@
 import json
-from backend.email_notifications import send_admin_submission_email
+from backend.email_notifications import (
+    build_instructor_application_email_data,
+    send_admin_submission_email,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -197,7 +200,7 @@ class InstructorApplicationSubmitAPI(APIView):
             serializer.save()
             send_admin_submission_email(
                 title="New instructor application submission",
-                data=dict(serializer.data),
+                data=build_instructor_application_email_data(dict(serializer.data)),
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -178,3 +178,37 @@ class CourseSectionMetaView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HomeCourseScrollingView(APIView):
+    """
+    Aggregates scrolling marquee items from all courses that enabled the scrolling
+    and opted-in for the Home page.
+    """
+
+    def get(self, request):
+        metas = CourseSectionMeta.objects.filter(
+            scrolling_enabled=True,
+            scrolling_location__in=["home", "both"],
+        )
+
+        items: list[str] = []
+        for meta in metas:
+            raw = getattr(meta, "scrolling_items", "") or ""
+            # Accept "one per line" and also allow comma-separated values.
+            chunks = raw.replace(",", "\n").splitlines()
+            for c in chunks:
+                v = str(c).strip()
+                if v:
+                    items.append(v)
+
+        # Keep order, remove duplicates (stable) while preserving first occurrence.
+        seen = set()
+        unique_items = []
+        for it in items:
+            if it in seen:
+                continue
+            seen.add(it)
+            unique_items.append(it)
+
+        return Response(unique_items)

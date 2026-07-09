@@ -1,3 +1,4 @@
+from backend.email_notifications import build_user_lead_email_data, send_admin_submission_email
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -119,6 +120,25 @@ class DemoViewSet(viewsets.ModelViewSet):
 class DemoRequestViewSet(viewsets.ModelViewSet):
     queryset = DemoRequest.objects.all()
     serializer_class = DemoRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        instance = serializer.instance
+        send_admin_submission_email(
+            title="New demo request submission",
+            data=build_user_lead_email_data(
+                {
+                    "full_name": instance.full_name,
+                    "email": instance.email,
+                    "phone": instance.phone,
+                    "course": instance.course,
+                }
+            ),
+        )
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=False, methods=["post"])
     def bulk_delete(self, request):

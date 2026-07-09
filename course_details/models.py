@@ -141,5 +141,24 @@ class CourseSectionMeta(models.Model):
     blogs_heading = models.CharField(max_length=200, blank=True, default="")
     faqs_heading = models.CharField(max_length=200, blank=True, default="")
 
+    # -----------------------------
+    # Scrolling marquee (hero bottom)
+    # -----------------------------
+    # If enabled, frontend can render the configured items as a marquee at the
+    # bottom of the course hero and/or on the home page hero.
+    scrolling_enabled = models.BooleanField(default=False)
+    SCROLLING_LOCATION_CHOICES = [
+        ("course", "Course Details Page"),
+        ("home", "Home Page"),
+        ("both", "Both"),
+    ]
+    scrolling_location = models.CharField(
+        max_length=10,
+        choices=SCROLLING_LOCATION_CHOICES,
+        default="course",
+    )
+    # Store as plain text: one item per line (commas/newlines also accepted).
+    scrolling_items = models.TextField(blank=True, default="")
+
     def __str__(self):
         return f"Section Meta - {self.course.title}"

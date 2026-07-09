@@ -8,6 +8,11 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
+        extra_kwargs = {
+            "duration": {"required": False, "allow_blank": True},
+            "price": {"required": False, "allow_blank": True},
+            "rating": {"required": False},
+        }
 
 
 class CoursesPageContentSerializer(serializers.ModelSerializer):

@@ -6,6 +6,9 @@ urlpatterns = [
     path("course/<str:slug>/", CourseDetailView.as_view()),
     path("course/<str:slug>/meta/", CourseSectionMetaView.as_view()),
 
+    # ✅ Home-scrolling (aggregated from enabled course metas)
+    path("home-scrolling/", HomeCourseScrollingView.as_view()),
+
     # ✅ Sections (ALL USING SLUG)
     path("course/<str:slug>/about/", AboutView.as_view()),
     path("course/<str:slug>/about/<int:pk>/", AboutView.as_view()),
