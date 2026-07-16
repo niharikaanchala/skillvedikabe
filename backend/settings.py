@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
-
+from corsheaders.defaults import default_headers  # ✅ added
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-or(gytegqbphrokl9w+(j1za8xs$@b!n2k-9&_cb%06i1o*k_x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1","api.skillvedika.com"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
@@ -41,12 +41,17 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://127.0.0.1:3002",
     "http://localhost:3002",
+    "https://admin.skillvedika.com",
+    "https://skillvedika.com",
 ]
 
 # Allow any localhost / 127.0.0.1 port in development (Next may pick 3000/3001/3002).
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://(localhost|127\.0\.0\.1):\d+$",
-]
+#CORS_ALLOWED_ORIGIN_REGEXES = [
+#    r"^http://(localhost|127\.0\.0\.1):\d+$",
+#]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -126,6 +131,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -136,8 +142,6 @@ DATABASES = {
         'PORT': '3306',
     }
 }
-
-
 # settings.py
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -189,10 +193,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
+# STATIC / MEDIA
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
