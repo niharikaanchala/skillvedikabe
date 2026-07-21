@@ -1,8 +1,10 @@
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
+from backend.pagination import paginate_list
 from courses.models import Course
 from courses.serializers import CourseSerializer
 
@@ -10,13 +12,32 @@ from .models import Category, CategoryPageContent
 from .serializers import CategorySerializer
 
 
+def _include_inactive(request) -> bool:
+    value = (request.query_params.get("include_inactive") or "").strip().lower()
+    return value in ("1", "true", "yes")
+
+
+def _filter_categories(request, queryset):
+    search = (request.query_params.get("search") or "").strip()
+    if search:
+        queryset = queryset.filter(
+            Q(name__icontains=search)
+            | Q(slug__icontains=search)
+            | Q(description__icontains=search)
+            | Q(icon__icontains=search)
+        )
+    return queryset.order_by("name")
+
+
 # ✅ GET (all) + POST (create)
 class CategoryListView(APIView):
 
     def get(self, request):
         categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
+        if not _include_inactive(request):
+            categories = categories.filter(is_active=True)
+        categories = _filter_categories(request, categories)
+        return paginate_list(request, categories, CategorySerializer)
 
     def post(self, request):
         serializer = CategorySerializer(data=request.data)
@@ -31,17 +52,33 @@ class CategoryCoursesView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, id):
-        if not Category.objects.filter(pk=id).exists():
+        try:
+            category = Category.objects.get(pk=id)
+        except Category.DoesNotExist:
             return Response(
                 {"error": "Category not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        courses = Course.objects.filter(category_id=id).order_by("-rating", "title")
-        serializer = CourseSerializer(courses, many=True)
-        return Response(serializer.data)
+        if not _include_inactive(request) and not category.is_active:
+            return Response(
+                {"error": "Category not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        courses = Course.objects.filter(category_id=id).select_related("category")
+        if not _include_inactive(request):
+            courses = courses.filter(is_active=True)
+        search = (request.query_params.get("search") or "").strip()
+        if search:
+            courses = courses.filter(
+                Q(title__icontains=search)
+                | Q(slug__icontains=search)
+                | Q(description__icontains=search)
+            )
+        courses = courses.order_by("-rating", "title")
+        return paginate_list(request, courses, CourseSerializer)
 
 
-# ✅ GET (single) + PUT (update) + DELETE (single)
+# ✅ GET (single) + PUT (update) + PATCH + DELETE (single)
 class CategoryDetailView(APIView):
 
     def get_object(self, id):
@@ -54,6 +91,8 @@ class CategoryDetailView(APIView):
         category = self.get_object(id)
         if not category:
             return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        if not _include_inactive(request) and not category.is_active:
+            return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = CategorySerializer(category)
         return Response(serializer.data)
@@ -64,6 +103,18 @@ class CategoryDetailView(APIView):
             return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = CategorySerializer(category, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, id):
+        category = self.get_object(id)
+        if not category:
+            return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CategorySerializer(category, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -128,9 +179,17 @@ class CategoryPageContentView(APIView):
         }
 
     def get(self, request, id: int):
-        if not Category.objects.filter(pk=id).exists():
+        try:
+            category = Category.objects.get(pk=id)
+        except Category.DoesNotExist:
             return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
-        category = Category.objects.get(pk=id)
+        include_inactive = (request.query_params.get("include_inactive") or "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if not include_inactive and not category.is_active:
+            return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
         obj, _ = CategoryPageContent.objects.get_or_create(category=category)
         return Response(self._serialize(obj))
 

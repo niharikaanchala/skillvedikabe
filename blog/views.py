@@ -1,8 +1,10 @@
 import json
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from backend.pagination import paginate_list
 from .models import BlogPost, BlogParagraph, TableOfContent, MetaTags
 from .serializers import (
     BlogPostSerializer,
@@ -10,6 +12,23 @@ from .serializers import (
     TocSerializer,
     MetaTagsSerializer,
 )
+
+
+def _filter_blogs(request, queryset):
+    search = (request.query_params.get("search") or "").strip()
+    if search:
+        queryset = queryset.filter(
+            Q(title__icontains=search)
+            | Q(slug__icontains=search)
+            | Q(category__icontains=search)
+            | Q(author__icontains=search)
+            | Q(excerpt__icontains=search)
+        )
+    category = (request.query_params.get("category") or "").strip()
+    if category and category.lower() != "all":
+        queryset = queryset.filter(category__iexact=category)
+    return queryset.order_by("-date")
+
 
 # ----------------------------
 # GET ALL + CREATE BLOG (with paragraphs & TOC)
@@ -29,9 +48,24 @@ class BlogListView(APIView):
         return []
 
     def get(self, request):
-        blogs = BlogPost.objects.all().order_by('-date')
-        serializer = BlogPostSerializer(blogs, many=True, context={"request": request})
-        return Response(serializer.data)
+        base_qs = BlogPost.objects.prefetch_related("paragraphs", "toc").all()
+        blogs = _filter_blogs(request, base_qs)
+        response = paginate_list(
+            request,
+            blogs,
+            BlogPostSerializer,
+            context={"request": request},
+        )
+        # When paginating, include distinct categories for filter chips.
+        if isinstance(response.data, dict) and "results" in response.data:
+            cats = (
+                BlogPost.objects.exclude(category="")
+                .values_list("category", flat=True)
+                .distinct()
+                .order_by("category")
+            )
+            response.data["categories"] = list(cats)
+        return response
 
     def post(self, request):
         # Expect JSON with optional paragraphs and toc

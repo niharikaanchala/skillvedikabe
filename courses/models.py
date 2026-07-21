@@ -11,6 +11,10 @@ class Course(models.Model):
     seo_meta_title = models.TextField(blank=True, default="")
     seo_meta_description = models.TextField(blank=True, default="")
     seo_meta_keywords = models.TextField(blank=True, default="")
+    is_active = models.BooleanField(
+        default=True,
+        help_text="When False, the course is hidden from the public site.",
+    )
 
     # 🔥 Relationship
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="courses")

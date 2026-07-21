@@ -2,6 +2,12 @@ from django.db import models
 
 class SiteSetting(models.Model):
     google_analytics_id = models.CharField(max_length=50, blank=True, null=True)
+    google_ads_tag_id = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="Google Ads tag ID, e.g. AW-123456789",
+    )
     whatsapp_number = models.CharField(
         max_length=20,
         blank=True,

@@ -1,11 +1,41 @@
 import json
+from django.db.models import Q
 from backend.email_notifications import build_user_lead_email_data, send_admin_submission_email
+from backend.pagination import paginate_list
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAdminUser
+from categories.models import Category
 from .models import Course, CoursesPageContent, CourseCounsellingLead
 from .serializers import CourseSerializer, CourseCounsellingLeadSerializer
+
+
+def _include_inactive(request) -> bool:
+    value = (request.query_params.get("include_inactive") or "").strip().lower()
+    return value in ("1", "true", "yes")
+
+
+def _public_course_queryset():
+    return Course.objects.filter(is_active=True, category__is_active=True)
+
+
+def _filter_courses(request, queryset):
+    search = (request.query_params.get("search") or "").strip()
+    if search:
+        queryset = queryset.filter(
+            Q(title__icontains=search)
+            | Q(slug__icontains=search)
+            | Q(description__icontains=search)
+            | Q(duration__icontains=search)
+            | Q(price__icontains=search)
+            | Q(category__name__icontains=search)
+        )
+    category = (request.query_params.get("category") or "").strip()
+    if category.isdigit():
+        queryset = queryset.filter(category_id=int(category))
+    return queryset.order_by("-rating", "title")
+
 
 # -----------------------------
 # Courses CRUD
@@ -14,9 +44,13 @@ class CourseListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        courses = Course.objects.all()
-        serializer = CourseSerializer(courses, many=True)
-        return Response(serializer.data)
+        courses = (
+            Course.objects.select_related("category").all()
+            if _include_inactive(request)
+            else _public_course_queryset().select_related("category")
+        )
+        courses = _filter_courses(request, courses)
+        return paginate_list(request, courses, CourseSerializer)
 
     def post(self, request):
         is_bulk = isinstance(request.data, list)
@@ -40,6 +74,9 @@ class CourseDetailView(APIView):
         course = self.get_object(id)
         if not course:
             return Response({"error": "Course not found"}, status=404)
+        if not _include_inactive(request):
+            if not course.is_active or not course.category.is_active:
+                return Response({"error": "Course not found"}, status=404)
         serializer = CourseSerializer(course)
         return Response(serializer.data)
 
@@ -88,11 +125,20 @@ class CourseByCategoryView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, category_id):
-        courses = Course.objects.filter(category_id=category_id)
+        category_qs = Category.objects.filter(pk=category_id)
+        if not category_qs.exists():
+            return Response({"message": "No courses found"}, status=404)
+        category = category_qs.first()
+        if not _include_inactive(request) and not category.is_active:
+            return Response({"message": "No courses found"}, status=404)
+
+        courses = Course.objects.filter(category_id=category_id).select_related("category")
+        if not _include_inactive(request):
+            courses = courses.filter(is_active=True)
         if not courses.exists():
             return Response({"message": "No courses found"}, status=404)
-        serializer = CourseSerializer(courses, many=True)
-        return Response(serializer.data)
+        courses = _filter_courses(request, courses)
+        return paginate_list(request, courses, CourseSerializer)
 
 
 # -----------------------------

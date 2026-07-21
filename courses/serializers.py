@@ -12,6 +12,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "duration": {"required": False, "allow_blank": True},
             "price": {"required": False, "allow_blank": True},
             "rating": {"required": False},
+            "is_active": {"required": False},
         }
 
 

@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from backend.admin_auth import AdminObtainTokenView
+from backend.admin_auth import AdminObtainTokenView, AdminProfileView
 
 urlpatterns = [
     path('api/course-details/', include('course_details.urls')),
@@ -11,6 +11,8 @@ urlpatterns = [
     path("api/token", AdminObtainTokenView.as_view(), name="admin_token_obtain_noslash"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="admin_token_refresh"),
     path("api/token/refresh", TokenRefreshView.as_view(), name="admin_token_refresh_noslash"),
+    path("api/admin/profile/", AdminProfileView.as_view(), name="admin_profile"),
+    path("api/admin/profile", AdminProfileView.as_view(), name="admin_profile_noslash"),
     path('api/categories/', include('categories.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/blog/', include('blog.urls')),

@@ -3,9 +3,13 @@ from django.db import models
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
-    description = models.TextField()
+    description = models.TextField(blank=True, default="")
 
     icon = models.CharField(max_length=50, blank=True, null=True)  # optional
+    is_active = models.BooleanField(
+        default=True,
+        help_text="When False, the category is hidden from the public site.",
+    )
 
     def __str__(self):
         return self.name
